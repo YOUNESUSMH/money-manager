@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة التحكم</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h1> رصيد يونس 👋</h1>
+  <h2>الرصيد الحالي: <span><%= user.balance %> دج</span></h2>
+
+  <form action="/add-income" method="POST">
+    <input type="number" name="amount" placeholder="💰 دخل" required>
+    <button type="submit">➕ إضافة</button>
+  </form>
+
+  <form action="/add-loan" method="POST">
+    <input type="number" name="amount" placeholder="💸 سُلف" required>
+    <input type="text" name="to" placeholder="👤 إلى من؟" required>
+    <button type="submit">➖ سُلف</button>
+  </form>
+
+  
+
+  <form action="/add-expense" method="POST">
+    <input type="number" name="amount" placeholder="📤 مصروف" required>
+    <button type="submit">📉 خصم</button>
+  </form>
+
+
+  <h3>📜 سجل المعاملات:</h3>
+  <table>
+    <tr>
+      <th>النوع</th>
+      <th>المبلغ</th>
+      <th>إلى</th>
+      <th>التاريخ</th>
+      <th>الإجراءات</th>
+    </tr>
+    <% user.operations.forEach(op => { %>
+      <tr>
+<td>
+  <% if (op.type === 'income') { %>
+    💰 دخل
+  <% } else if (op.type === 'loan') { %>
+    💸 سُلف
+  <% } else if (op.type === 'personal') { %>
+    🧾 مصروف شخصي
+  <% } else { %>
+    - غير معروف -
+  <% } %>
+</td>
+        <td><%= op.amount %></td>
+        <td><%= op.to || '-' %></td>
+        <td><%= op.date.toLocaleDateString() %></td>
+        <td>
+          <form action="/delete-operation/<%= op._id %>" method="POST" style="display:inline;">
+            <button type="submit">🗑 حذف</button>
+          </form>
+          <form action="/edit-operation/<%= op._id %>" method="GET" style="display:inline;">
+            <button type="submit">✏ تعديل</button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+  </table>
+
+  <a href="/logout">🚪 خروج</a>
+</body>
+</html>

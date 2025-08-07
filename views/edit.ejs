@@ -1,0 +1,28 @@
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>تعديل العملية</title>
+</head>
+<body>
+  <h1>✏ تعديل العملية</h1>
+
+  <form action="/edit-operation/<%= operation._id %>" method="POST">
+    <label>المبلغ:</label><br>
+    <input type="number" name="amount" value="<%= operation.amount %>" required><br><br>
+
+    <label>النوع:</label><br>
+    <select name="type" required>
+      <option value="income" <%= operation.type === 'income' ? 'selected' : '' %>>دخل</option>
+      <option value="loan" <%= operation.type === 'loan' ? 'selected' : '' %>>سُلف</option>
+      <option value="expense" <%= operation.type === 'expense' ? 'selected' : '' %>>مصروف</option>
+    </select><br><br>
+
+    <label>إلى من (إن وجد):</label><br>
+    <input type="text" name="to" value="<%= operation.to || '' %>"><br><br>
+
+    <button type="submit">💾 حفظ</button>
+  </form>
+
+  <a href="/dashboard">⬅ عودة</a>
+</body>
+</html>
