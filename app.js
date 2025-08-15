@@ -10,10 +10,12 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-mongoose.connect('mongodb://localhost:27017/financeApp', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => console.log('✅ متصل بقاعدة البيانات'));
+require('dotenv').config();
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ Connected to MongoDB Atlas"))
+  .catch(err => console.error("❌ Connection error:", err));
+
 
 let currentUser = null;
 
@@ -156,7 +158,6 @@ app.post('/add-expense', async (req, res) => {
   res.redirect('/dashboard');
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(port, () => {
+  console.log(`🚀 الخادم يعمل على http://localhost:${port}`);
 });
