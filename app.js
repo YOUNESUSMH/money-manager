@@ -157,6 +157,12 @@ app.post('/add-expense', async (req, res) => {
   res.redirect('/dashboard');
 });
 
+// ✅ الصفحة الرئيسية
+app.get('/', (req, res) => {
+  res.redirect('/login'); // يحول تلقائياً إلى صفحة تسجيل الدخول
+});
+
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
