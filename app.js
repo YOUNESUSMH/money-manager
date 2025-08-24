@@ -4,7 +4,6 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const User = require('./models/User');
 const app = express();
-const port = 3000;
 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
@@ -158,6 +157,9 @@ app.post('/add-expense', async (req, res) => {
   res.redirect('/dashboard');
 });
 
-app.listen(port, () => {
-  console.log(`🚀 الخادم يعمل على http://localhost:${port}`);
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 الخادم يعمل على http://localhost:${PORT}`);
 });
+
