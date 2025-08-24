@@ -157,6 +157,43 @@ app.post('/add-expense', async (req, res) => {
   res.redirect('/dashboard');
 });
 
+// صفحة التسجيل
+app.get('/register', (req, res) => {
+  res.render('register'); // ملف EJS جديد اسمه register.ejs
+});
+
+// استقبال بيانات التسجيل
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    // نتأكد إذا كان الاسم موجود مسبقًا
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.send('اسم المستخدم موجود بالفعل');
+    }
+
+    // تشفير كلمة المرور
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // إنشاء مستخدم جديد
+    const newUser = new User({
+      username,
+      password: hashedPassword,
+      balance: 0,
+      operations: []
+    });
+
+    await newUser.save();
+
+    res.redirect('/login'); // بعد التسجيل يروح لصفحة تسجيل الدخول
+  } catch (err) {
+    console.error(err);
+    res.send('حدث خطأ أثناء التسجيل');
+  }
+});
+
+
 // ✅ الصفحة الرئيسية
 app.get('/', (req, res) => {
   res.redirect('/login'); // يحول تلقائياً إلى صفحة تسجيل الدخول
