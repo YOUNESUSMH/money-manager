@@ -32,3 +32,20 @@ span{
   background-color: greenyellow;
 }
 
+/* للأجهزة الصغيرة (شاشات الهواتف) */
+@media (max-width: 600px) {
+  body {
+    font-size: 16px;
+    padding: 10px;
+  }
+
+  form {
+    width: 100%;
+    padding: 15px;
+  }
+
+  input, button {
+    width: 100%;
+    font-size: 16px;
+  }
+}
