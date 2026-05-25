@@ -1,72 +1,97 @@
-/* إعدادات عامة وتنسيق الخطوط */
+/* =========================================
+   تنسيق مضغوط (Compact) مناسب للهواتف
+   ========================================= */
+
+/* إعدادات عامة لتوفير المساحة */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  -webkit-tap-highlight-color: transparent; /* منع التظليل عند اللمس في الهاتف */
 }
 
 body {
-  direction: rtl; /* دعم الكتابة من اليمين لليوم */
+  direction: rtl;
   text-align: center;
-  background: #f4f7f6;
+  background: #fdfdfd; /* خلفية أفتح قليلاً */
   color: #333;
-  padding: 20px;
+  padding: 10px; /* تقليل الحواف الخارجية */
 }
 
+/* تصغير العناوين */
 h1 {
-  margin: 20px 0 10px;
+  margin: 10px 0 5px;
   color: #2c3e50;
-  font-size: 1.8rem;
+  font-size: 1.4rem; /* تصغير حجم العنوان الرئيسي */
 }
 
-/* 💳 كارت الرصيد الحالي */
+/* =========================================
+   💳 كارت الرصيد (مدمج ومضغوط)
+   ========================================= */
+.balance-card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px; /* تقليل الفراغ بين الكارتين */
+  max-width: 400px;
+  margin: 0 auto 15px;
+}
+
 h2 {
   background: white;
-  max-width: 400px;
-  margin: 0 auto 25px;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  font-size: 1.2rem;
+  width: 100%;
+  margin: 0;
+  padding: 10px; /* تقليل الحشو الداخلي */
+  border-radius: 10px; /* زوايا أنعم وأصغر */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  font-size: 0.95rem; /* تصغير حجم الخط */
   color: #555;
+  border: 1px solid #eee; /* إضافة إطار خفيف جداً للتحديد */
 }
 
 h2 span {
   display: block;
-  font-size: 2rem;
+  font-size: 1.6rem; /* تصغير حجم الرقم */
   font-weight: bold;
-  color: #2ecc71; /* لون أخضر مريح */
+  color: #2ecc71; /* لون أخضر */
   background: none;
-  margin-top: 5px;
+  margin-top: 3px;
 }
 
-/* 📦 حاوية النماذج (Forms Layout) */
+/* تنسيق الكارت الأزرق للرصيد الكامل */
+.full-balance-card span {
+  color: #2980b9; /* أزرق */
+}
+
+/* =========================================
+   📦 النماذج (مدمجة ومنظمة)
+   ========================================= */
 .forms-container {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px; /* تقليل الفراغ بين النماذج */
   max-width: 500px;
-  margin: 0 auto 30px;
+  margin: 0 auto 20px;
 }
 
 form {
-  background: white;
-  padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  background: #fbfbfb; /* خلفية أغمق قليلاً للنماذج */
+  padding: 10px; /* تقليل الحشو الداخلي */
+  border-radius: 10px;
+  box-shadow: none; /* إزالة الظل لتوفير المساحة */
+  border: 1px solid #f0f0f0; /* إضافة إطار خفيف */
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px; /* تقليل الفراغ الداخلي بين العناصر */
 }
 
 /* تنسيق الحقول Inputs */
 input {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
+  padding: 10px; /* تقليل الحشو الداخلي */
+  border: 1px solid #e0e0e0;
+  border-radius: 6px; /* زوايا أصغر للinputs */
+  font-size: 0.95rem; /* تصغير حجم الخط */
   outline: none;
   transition: 0.3s;
   text-align: center;
@@ -74,141 +99,118 @@ input {
 
 input:focus {
   border-color: #3498db;
-  box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 0 3px rgba(52, 152, 219, 0.2); /* ظل أصغر للتركيز */
 }
 
-/* الأزرار بتنسيقات ملونة حسب نوع العملية */
+/* الأزرار (تصغير الحجم وتلوين) */
 button {
-  padding: 12px;
+  padding: 10px; /* تقليل الحشو الداخلي */
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: bold;
+  border-radius: 6px; /* زوايا أصغر للأزرار */
+  font-size: 0.95rem; /* تصغير حجم الخط */
+  font-weight: 600; /* جعل الخط أكثر سمكاً بقليل */
   color: white;
   cursor: pointer;
   transition: 0.2s;
   width: 100%;
 }
 
-form[action="/add-income"] button { background-color: #2ecc71; }
-form[action="/add-income"] button:hover { background-color: #27ae60; }
+/* ألوان الأزرار المحددة (نفس الألوان ولكن تم تصغير الحجم) */
+form[action="/add-income"] button { background-color: #27ae60; }
+form[action="/add-income"] button:hover { background-color: #219150; }
 
-form[action="/add-loan"] button { background-color: #e67e22; }
-form[action="/add-loan"] button:hover { background-color: #d35400; }
+form[action="/add-loan"] button { background-color: #d35400; }
+form[action="/add-loan"] button:hover { background-color: #ba4a00; }
 
-form[action="/add-expense"] button { background-color: #e74c3c; }
-form[action="/add-expense"] button:hover { background-color: #c0392b; }
+form[action="/add-expense"] button { background-color: #c0392b; }
+form[action="/add-expense"] button:hover { background-color: #a93226; }
 
-/* 📜 جدول العمليات وتجهيزه للهاتف */
+/* =========================================
+   📜 جدول العمليات (تصغير وتبسيط)
+   ========================================= */
 h3 {
-  margin: 25px 0 15px;
+  margin: 20px 0 10px;
   color: #2c3e50;
   text-align: right;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+  font-size: 1.1rem; /* تصغير حجم عنوان الجدول */
 }
 
 table {
-  margin: 0 auto 30px;
+  margin: 0 auto 20px;
   border-collapse: collapse;
   width: 100%;
   max-width: 600px;
   background: white;
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 th, td {
-  padding: 12px 10px;
+  padding: 8px 6px; /* تقليل الحشو الداخلي بشكل كبير */
   border-bottom: 1px solid #eee;
-  font-size: 0.9rem;
+  font-size: 0.85rem; /* تصغير حجم الخط في الجدول */
 }
 
 th {
-  background-color: #34495e;
+  background-color: #444; /* لون خلفية أغمق للرأس */
   color: white;
   font-weight: 600;
 }
 
-/* أزرار الحذف والتعديل داخل الجدول */
+/* أزرار الإجراءات داخل الجدول (تصغير الحجم) */
 td form button {
-  padding: 6px 10px;
-  font-size: 0.8rem;
+  padding: 5px 8px; /* تقليل الحشو الداخلي */
+  font-size: 0.75rem; /* تصغير حجم الخط للأزرار الداخلية */
   width: auto;
   display: inline-block;
-  margin: 2px;
+  margin: 1px; /* تقليل الفراغ بين الأزرار */
 }
 
-td form[action^="/delete-operation"] button { background-color: #ef5350; }
-td form[action^="/edit-operation"] button { background-color: #42a5f5; }
+/* ألوان الأزرار الداخلية المحددة (نفس الألوان ولكن تم تصغير الحجم) */
+td form[action^="/delete-operation"] button { background-color: #d9534f; }
+td form[action^="/edit-operation"] button { background-color: #5bc0de; }
 
-/* زر خروج */
+/* =========================================
+   🚪 زر الخروج (مدمج وضيق)
+   ========================================= */
 a[href="/logout"] {
   display: inline-block;
-  margin: 20px auto;
-  padding: 10px 25px;
-  background-color: #7f8c8d;
-  color: white;
+  margin: 15px auto;
+  padding: 8px 20px; /* تقليل الحشو الداخلي */
+  background-color: #f0f0f0; /* خلفية فاتحة */
+  color: #555; /* لون خط رمادي */
   text-decoration: none;
-  border-radius: 8px;
-  font-weight: bold;
+  border-radius: 6px; /* زوايا أصغر */
+  font-weight: 600; /* جعل الخط أكثر سمكاً بقليل */
   transition: 0.3s;
+  border: 1px solid #ccc; /* إضافة إطار خفيف جداً للتحديد */
 }
-a[href="/logout"]:hover { background-color: #95a5a6; }
+a[href="/logout"]:hover { background-color: #e0e0e0; }
 
-/* 📱 تحسينات خاصة بالهواتف وشاشات اللمس الصغيرة */
+/* =========================================
+   📱 تحسينات خاصة بالهواتف وشاشات اللمس الصغيرة (تم تحسينها بشكل أكبر)
+   ========================================= */
 @media (max-width: 600px) {
   body {
-    padding: 10px;
+    padding: 5px; /* تقليل الحواف الخارجية أكثر */
   }
   
-  h1 { font-size: 1.5rem; }
+  h1 { font-size: 1.3rem; } /* تصغير العنوان الرئيسي أكثر */
   
   /* جعل الجدول مرناً وقابلاً للتمرير الأفقي في الشاشات الضيقة جداً */
   table {
     display: block;
     overflow-x: auto;
     white-space: nowrap;
+    -webkit-overflow-scrolling: touch; /* تمرير سلس على نظام التشغيل iOS */
   }
   
   th, td {
-    padding: 10px 8px;
-    font-size: 0.85rem;
-  }
-}
-
-/* تنسيق حاوية الكروت لتظهر بشكل أنيق */
-.balance-card-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 400px;
-  margin: 0 auto 25px;
-}
-
-/* تعديل خصائص الـ h2 القديمة لكي تتناسب مع الحاوية الجديدة */
-h2 {
-  background: white;
-  width: 100%;
-  margin: 0;
-  padding: 15px;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  font-size: 1.1rem;
-  color: #555;
-}
-
-/* تخصيص لون الرصيد الكامل باللون الأزرق */
-.full-balance-card span {
-  color: #2980b9; /* أزرق فخم */
-}
-
-/* لكي يظهرا بجانب بعضهما في الشاشات الكبيرة وتحت بعضهما في الهاتف */
-@media (min-width: 600px) {
-  .balance-card-container {
-    flex-direction: row;
-    max-width: 600px;
+    padding: 6px 4px; /* تقليل الحشو الداخلي أكثر للجدول على الهاتف */
+    font-size: 0.8rem; /* تصغير حجم الخط في الجدول أكثر على الهاتف */
   }
 }
