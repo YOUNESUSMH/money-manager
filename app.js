@@ -48,10 +48,25 @@ app.get('/create-user', async (req, res) => {
 });
 
 // ✅ لوحة التحكم
+// ✅ لوحة التحكم المطورة بحساب الأرصدة
 app.get('/dashboard', async (req, res) => {
   if (!currentUser) return res.redirect('/login');
+  
   const user = await User.findById(currentUser._id);
-  res.render('dashboard', { user });
+  
+  // 🧮 حساب إجمالي المبالغ التي سلفتها للناس حالياً
+  let totalLoans = 0;
+  user.operations.forEach(op => {
+    if (op.type === 'loan') {
+      totalLoans += op.amount;
+    }
+  });
+
+  // ➕ الرصيد الكامل = الرصيد الحالي (الكاش اللي في جيبك) + السُلف (اللي عند الناس)
+  const fullBalance = user.balance + totalLoans;
+
+  // إرسال الـ user والـ fullBalance معاً إلى صفحة الداشبورد
+  res.render('dashboard', { user, fullBalance });
 });
 
 // ✅ إضافة دخل

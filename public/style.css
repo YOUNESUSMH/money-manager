@@ -1,51 +1,214 @@
+/* إعدادات عامة وتنسيق الخطوط */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 body {
-  font-family: Arial;
+  direction: rtl; /* دعم الكتابة من اليمين لليوم */
   text-align: center;
-  background: #f5f5f5;
+  background: #f4f7f6;
+  color: #333;
   padding: 20px;
 }
 
-
-form {
-  margin: 10px 0;
+h1 {
+  margin: 20px 0 10px;
+  color: #2c3e50;
+  font-size: 1.8rem;
 }
 
-input, select, button {
-  padding: 8px;
-  margin: 5px;
+/* 💳 كارت الرصيد الحالي */
+h2 {
+  background: white;
+  max-width: 400px;
+  margin: 0 auto 25px;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  font-size: 1.2rem;
+  color: #555;
+}
+
+h2 span {
+  display: block;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2ecc71; /* لون أخضر مريح */
+  background: none;
+  margin-top: 5px;
+}
+
+/* 📦 حاوية النماذج (Forms Layout) */
+.forms-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 500px;
+  margin: 0 auto 30px;
+}
+
+form {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* تنسيق الحقول Inputs */
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: 0.3s;
+  text-align: center;
+}
+
+input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
+/* الأزرار بتنسيقات ملونة حسب نوع العملية */
+button {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+  width: 100%;
+}
+
+form[action="/add-income"] button { background-color: #2ecc71; }
+form[action="/add-income"] button:hover { background-color: #27ae60; }
+
+form[action="/add-loan"] button { background-color: #e67e22; }
+form[action="/add-loan"] button:hover { background-color: #d35400; }
+
+form[action="/add-expense"] button { background-color: #e74c3c; }
+form[action="/add-expense"] button:hover { background-color: #c0392b; }
+
+/* 📜 جدول العمليات وتجهيزه للهاتف */
+h3 {
+  margin: 25px 0 15px;
+  color: #2c3e50;
+  text-align: right;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 table {
-  margin: 20px auto;
+  margin: 0 auto 30px;
   border-collapse: collapse;
-  width: 80%;
+  width: 100%;
+  max-width: 600px;
   background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 th, td {
-  padding: 10px;
-  border: 1px solid #ddd;
+  padding: 12px 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
 }
 
-span{
-  padding: 5px 5px;
-  background-color: greenyellow;
+th {
+  background-color: #34495e;
+  color: white;
+  font-weight: 600;
 }
 
-/* للأجهزة الصغيرة (شاشات الهواتف) */
+/* أزرار الحذف والتعديل داخل الجدول */
+td form button {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  width: auto;
+  display: inline-block;
+  margin: 2px;
+}
+
+td form[action^="/delete-operation"] button { background-color: #ef5350; }
+td form[action^="/edit-operation"] button { background-color: #42a5f5; }
+
+/* زر خروج */
+a[href="/logout"] {
+  display: inline-block;
+  margin: 20px auto;
+  padding: 10px 25px;
+  background-color: #7f8c8d;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+a[href="/logout"]:hover { background-color: #95a5a6; }
+
+/* 📱 تحسينات خاصة بالهواتف وشاشات اللمس الصغيرة */
 @media (max-width: 600px) {
   body {
-    font-size: 16px;
     padding: 10px;
   }
-
-  form {
-    width: 100%;
-    padding: 15px;
+  
+  h1 { font-size: 1.5rem; }
+  
+  /* جعل الجدول مرناً وقابلاً للتمرير الأفقي في الشاشات الضيقة جداً */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
   }
+  
+  th, td {
+    padding: 10px 8px;
+    font-size: 0.85rem;
+  }
+}
 
-  input, button {
-    width: 100%;
-    font-size: 16px;
+/* تنسيق حاوية الكروت لتظهر بشكل أنيق */
+.balance-card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  margin: 0 auto 25px;
+}
+
+/* تعديل خصائص الـ h2 القديمة لكي تتناسب مع الحاوية الجديدة */
+h2 {
+  background: white;
+  width: 100%;
+  margin: 0;
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  font-size: 1.1rem;
+  color: #555;
+}
+
+/* تخصيص لون الرصيد الكامل باللون الأزرق */
+.full-balance-card span {
+  color: #2980b9; /* أزرق فخم */
+}
+
+/* لكي يظهرا بجانب بعضهما في الشاشات الكبيرة وتحت بعضهما في الهاتف */
+@media (min-width: 600px) {
+  .balance-card-container {
+    flex-direction: row;
+    max-width: 600px;
   }
 }
