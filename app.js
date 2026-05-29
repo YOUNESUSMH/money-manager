@@ -49,24 +49,46 @@ app.get('/create-user', async (req, res) => {
 
 // ✅ لوحة التحكم
 // ✅ لوحة التحكم المطورة بحساب الأرصدة
+// ✅ لوحة التحكم المطورة: فلترة ذكية + إحصائيات شهرية
 app.get('/dashboard', async (req, res) => {
   if (!currentUser) return res.redirect('/login');
   
   const user = await User.findById(currentUser._id);
   
-  // 🧮 حساب إجمالي المبالغ التي سلفتها للناس حالياً
+  // 1️⃣ جلب نوع الفلتر من الرابط (إذا لم يحدد، يعرض 'all' تلقائياً)
+  const filterType = req.query.type || 'all';
+
+  // 2️⃣ حساب الإحصائيات (تمر على كل العمليات لحساب الإجماليات)
   let totalLoans = 0;
+  let totalExpenses = 0;
+  let totalIncomes = 0;
+
   user.operations.forEach(op => {
-    if (op.type === 'loan') {
-      totalLoans += op.amount;
-    }
+    if (op.type === 'loan') totalLoans += op.amount;
+    if (op.type === 'personal') totalExpenses += op.amount;
+    if (op.type === 'income') totalIncomes += op.amount;
   });
 
-  // ➕ الرصيد الكامل = الرصيد الحالي (الكاش اللي في جيبك) + السُلف (اللي عند الناس)
-  const fullBalance = user.balance + totalLoans;
+  const fullBalance = user.balance + totalLoans; // الرصيد الكامل
 
-  // إرسال الـ user والـ fullBalance معاً إلى صفحة الداشبورد
-  res.render('dashboard', { user, fullBalance });
+  // 3️⃣ تصفية (فلترة) مصفوفة العمليات بناءً على طلبك
+  let filteredOperations = user.operations;
+  if (filterType !== 'all') {
+    filteredOperations = user.operations.filter(op => op.type === filterType);
+  }
+
+  // 4️⃣ ترتيب العمليات من الأحدث إلى الأقدم (لكي لا تتعب في النزول للأسفل)
+  filteredOperations.sort((a, b) => b.date - a.date);
+
+  // إرسال كل البيانات الجديدة إلى صفحة الـ EJS
+  res.render('dashboard', { 
+    user, 
+    fullBalance, 
+    totalLoans, 
+    totalExpenses, 
+    filteredOperations, // 👈 الجدول سيعرض هذه المصفوفة المفلترة والمنظمة
+    filterType // 👈 لمعرفة الفلتر الحالي وتلوينه
+  });
 });
 
 // ✅ إضافة دخل
@@ -104,6 +126,7 @@ app.post('/add-loan', async (req, res) => {
 });
 
 // ✅ حذف عملية
+// ✅ دالة الحذف المصححة والمضمونة لجميع العمليات
 app.post('/delete-operation/:opId', async (req, res) => {
   const opId = req.params.opId;
   const user = await User.findById(currentUser._id);
@@ -113,8 +136,11 @@ app.post('/delete-operation/:opId', async (req, res) => {
     const amount = operation.amount;
     const type = operation.type;
 
-    if (type === 'income') user.balance -= amount;
-    if (type === 'loan') user.balance += amount;
+    if (type === 'income') user.balance -= amount; // حذف الدخل ينقص الرصيد
+    if (type === 'loan') user.balance += amount;   // حذف السلفة يعيد المال للرصيد
+    
+    // 💡 التعديل الجديد هنا لحل مشكلتك:
+    if (type === 'personal') user.balance += amount; // حذف المصروف يعيد المال للرصيد الحالي
 
     operation.deleteOne();
     await user.save();

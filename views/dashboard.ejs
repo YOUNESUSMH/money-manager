@@ -2,15 +2,23 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>لوحة التحكم</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <h1> رصيدي  👋</h1>
-<div class="balance-card-container">
-    <h2>الرصيد الفعلي الحالي: <span><%= user.balance %> دج</span></h2>
+  
+  <div class="balance-card-container">
+    <h2>الرصيد الحالي (كاش): <span><%= user.balance %> دج</span></h2>
     <h2 class="full-balance-card">الرصيد الكامل (مع السُلف): <span><%= fullBalance %> دج</span></h2>
   </div>
+
+  <div class="stats-container">
+    <div class="stat-card expense-stats">📉 إجمالي المصاريف: <span><%= totalExpenses %> دج</span></div>
+    <div class="stat-card loan-stats">🤝 سُلف متبقية عند الناس: <span><%= totalLoans %> دج</span></div>
+  </div>
+
   <div class="forms-container">
     <form action="/add-income" method="POST">
       <input type="number" name="amount" placeholder="💰 دخل مالي" required>
@@ -30,6 +38,13 @@
   </div>
 
   <h3>📜 سجل المعاملات:</h3>
+  <div class="filter-bar">
+    <a href="/dashboard?type=all" class="filter-btn <%= filterType === 'all' ? 'active' : '' %>">الكل</a>
+    <a href="/dashboard?type=income" class="filter-btn <%= filterType === 'income' ? 'active' : '' %>">💰 الدخل</a>
+    <a href="/dashboard?type=loan" class="filter-btn <%= filterType === 'loan' ? 'active' : '' %>">💸 السُلف</a>
+    <a href="/dashboard?type=personal" class="filter-btn <%= filterType === 'personal' ? 'active' : '' %>">📤 المصاريف</a>
+  </div>
+
   <table>
     <tr>
       <th>النوع</th>
@@ -38,34 +53,29 @@
       <th>التاريخ</th>
       <th>الإجراءات</th>
     </tr>
-    <% user.operations.forEach(op => { %>
+    <% filteredOperations.forEach(op => { %>
       <tr>
         <td>
-          <% if (op.type === 'income') { %>
-            💰 دخل
-          <% } else if (op.type === 'loan') { %>
-            💸 سُلف
-          <% } else if (op.type === 'personal') { %>
-            🧾 مصروف شخصي
-          <% } else { %>
-            - غير معروف -
-          <% } %>
+          <% if (op.type === 'income') { %> 💰 دخل
+          <% } else if (op.type === 'loan') { %> 💸 سُلف
+          <% } else if (op.type === 'personal') { %> 🧾 مصروف
+          <% } else { %> - <% } %>
         </td>
         <td><strong><%= op.amount %> دج</strong></td>
         <td><%= op.to || '-' %></td>
         <td><%= op.date.toLocaleDateString() %></td>
         <td>
           <form action="/delete-operation/<%= op._id %>" method="POST" style="display:inline;">
-            <button type="submit">🗑 حذف</button>
+            <button type="submit">🗑</button>
           </form>
           <form action="/edit-operation/<%= op._id %>" method="GET" style="display:inline;">
-            <button type="submit">✏ تعديل</button>
+            <button type="submit">✏</button>
           </form>
         </td>
       </tr>
     <% }) %>
   </table>
 
-  <a href="/logout">🚪 تسجيل الخروج</a>
+  <a href="/logout" class="logout-btn">🚪 تسجيل الخروج</a>
 </body>
 </html>
