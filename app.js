@@ -182,9 +182,15 @@ app.post('/edit-operation/:opId', async (req, res) => {
 });
 
 // ✅ مسار إضافة مصروف مطور بالفئة
+// ✅ مسار إضافة مصروف مرن (يدعم الخيارات الجاهزة والمخصصة)
 app.post('/add-expense', async (req, res) => {
   const amount = parseFloat(req.body.amount);
-  const category = req.body.category || 'أخرى'; // استقبال الفئة من النموذج
+  let category = req.body.category;
+
+  // 💡 إذا اختار المستخدم "كتابة فئة أخرى"، نأخذ النص الذي كتبه بيده
+  if (category === 'custom') {
+    category = req.body.custom_category || 'أخرى';
+  }
 
   await User.findByIdAndUpdate(currentUser._id, {
     $inc: { balance: -amount },
@@ -192,7 +198,7 @@ app.post('/add-expense', async (req, res) => {
       operations: {
         amount,
         type: 'personal',
-        category, // 👈 حفظ الفئة المحددة في قاعدة البيانات
+        category, // 👈 سيتم حفظ النص المكتوب بيدك هنا بسلام
         date: new Date()
       }
     }
