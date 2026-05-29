@@ -2,18 +2,35 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تسجيل الدخول</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <h1 style="margin-left:500px; margin-top: 170px;">تسجيل الدخول</h1>
-  <form style="margin:10px 500px;"  action="/login" method="POST">
-    <label>اسم المستخدم:</label><br>
-    <input type="text" name="username" required><br><br>
 
-    <label>كلمة السر:</label><br>
-    <input type="password" name="password" required><br><br>
+  <div class="auth-container">
+    <h1>🔑 تسجيل الدخول</h1>
+    <p class="auth-subtitle">مرحباً بك مجدداً! يرجى إدخال بياناتك لإدارة رصيدك.</p>
 
-    <button type="submit">دخول</button>
-  </form>
+    <form action="/login" method="POST" class="auth-form">
+      <div class="input-group">
+        <label for="username">👤 اسم المستخدم:</label>
+        <input type="text" id="username" name="username" placeholder="أدخل اسم المستخدم" required>
+      </div>
+
+      <div class="input-group">
+        <label for="password">🔒 كلمة السر:</label>
+        <input type="password" id="password" name="password" placeholder="أدخل كلمة السر" required>
+      </div>
+
+      <button type="submit" class="login-submit-btn">دخول السيرفر 🚀</button>
+    </form>
+
+    <div class="auth-footer">
+      <span>ليس لديك حساب؟</span>
+      <a href="/register">إنشاء حساب جديد</a>
+    </div>
+  </div>
+
 </body>
 </html>
