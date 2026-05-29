@@ -181,15 +181,18 @@ app.post('/edit-operation/:opId', async (req, res) => {
   res.redirect('/dashboard');
 });
 
+// ✅ مسار إضافة مصروف مطور بالفئة
 app.post('/add-expense', async (req, res) => {
   const amount = parseFloat(req.body.amount);
+  const category = req.body.category || 'أخرى'; // استقبال الفئة من النموذج
 
   await User.findByIdAndUpdate(currentUser._id, {
     $inc: { balance: -amount },
     $push: {
       operations: {
         amount,
-        type: 'personal', // 🧾 مصروف شخصي
+        type: 'personal',
+        category, // 👈 حفظ الفئة المحددة في قاعدة البيانات
         date: new Date()
       }
     }

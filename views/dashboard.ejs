@@ -32,7 +32,17 @@
     </form>
 
     <form action="/add-expense" method="POST">
-      <input type="number" name="amount" placeholder="📤 مصروف شخصي" required>
+      <input type="number" name="amount" placeholder="📤 مصروف شخصي (المبلغ)" required>
+      
+      <select name="category" required style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 0.95rem; background: #fafafa; text-align: center;">
+        <option value="" disabled selected>🛒 اختر فئة المصروف</option>
+        <option value="غذاء">🍔 أكل وشرب</option>
+        <option value="نقل">🚌 مواصلات ونقل</option>
+        <option value="إنترنت">📱 إنترنت ورصيد هاتف</option>
+        <option value="ملابس">👕 ملابس ومشتريات</option>
+        <option value="أخرى">📦 مصاريف أخرى</option>
+      </select>
+      
       <button type="submit">📉 خصم مصروف</button>
     </form>
   </div>
@@ -56,10 +66,14 @@
     <% filteredOperations.forEach(op => { %>
       <tr>
         <td>
-          <% if (op.type === 'income') { %> 💰 دخل
-          <% } else if (op.type === 'loan') { %> 💸 سُلف
-          <% } else if (op.type === 'personal') { %> 🧾 مصروف
-          <% } else { %> - <% } %>
+         <% if (op.type === 'income') { %> 
+            💰 دخل
+          <% } else if (op.type === 'loan') { %> 
+            💸 سُلف
+          <% } else if (op.type === 'personal') { %> 
+            🧾 مصروف (<%= op.category || 'أخرى' %>) <% } else { %> 
+            - 
+          <% } %>
         </td>
         <td><strong><%= op.amount %> دج</strong></td>
         <td><%= op.to || '-' %></td>
