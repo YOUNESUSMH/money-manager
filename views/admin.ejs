@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم المدير 👑</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .admin-table th, .admin-table td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+    .admin-table th { background-color: #2c3e50; color: white; }
+    .delete-user-btn { background-color: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+    .delete-user-btn:hover { background-color: #c0392b; }
+    .hash-text { font-family: monospace; font-size: 0.75rem; color: #7f8c8d; block-size: 20px; overflow: hidden; display: inline-block; max-width: 120px; text-overflow: ellipsis; white-space: nowrap; }
+  </style>
+</head>
+<body style="background-color: #f4f6f9; padding: 15px;">
+
+  <div style="max-width: 800px; margin: 0 auto; text-align: right;" dir="rtl">
+    <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+      <h2>👑 إدارة المستخدمين</h2>
+      <a href="/dashboard" style="text-decoration: none; background: #3498db; color: white; padding: 8px 15px; border-radius: 5px; font-size: 0.9rem;">العودة للرئيسية 🏠</a>
+    </div>
+
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>اسم المستخدم</th>
+          <th>كلمة السر (مشفرة آلياً)</th>
+          <th>التحكم</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(u => { %>
+          <tr>
+            <td style="font-weight: bold; color: #2c3e50;">👤 <%= u.username %></td>
+            <td><span class="hash-text" title="<%= u.password %>"><%= u.password %></span></td>
+            <td>
+              <form action="/admin/delete-user/<%= u._id %>" method="POST" onsubmit="return confirm('هل أنت متأكد تماماً من حذف هذا المستخدم وكل بياناته المالية؟');" style="margin:0;">
+                <button type="submit" class="delete-user-btn">حذف الحساب 🗑️</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+</body>
+</html>

@@ -218,6 +218,35 @@ app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
+// 👑 صفحة لوحة تحكم المدير (رؤية المستخدمين وحذفهم)
+app.get('/admin-panel', requireLogin, async (req, res) => {
+  // 🔒 حماية إضافية: تأكد أن المستخدم الحالي هو أنت فقط (استبدل 'younes' باسم حسابك الحقيقي)
+  if (req.session.user.username !== 'younes') {
+    return res.status(403).send('❌ عذراً، هذه الصفحة مخصصة لمدير الموقع فقط!');
+  }
+
+  // جلب كل المستخدمين من قاعدة البيانات
+  const allUsers = await User.find({}, 'username password createdAt'); 
+  res.render('admin', { users: allUsers });
+});
+
+// 🗑️ مسار حذف مستخدم معين
+app.post('/admin/delete-user/:userId', requireLogin, async (req, res) => {
+  if (req.session.user.username !== 'younes') {
+    return res.status(403).send('غير مصرح لك');
+  }
+
+  const userId = req.params.userId;
+  
+  // حماية لكي لا تحذف حسابك الخاص بالخطأ
+  if (userId === req.session.user._id.toString()) {
+    return res.send('❌ لا يمكنك حذف حسابك الخاص كمدير من هنا!');
+  }
+
+  await User.findByIdAndDelete(userId);
+  res.redirect('/admin-panel');
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 الخادم يعمل بأمان على http://localhost:${PORT}`);
