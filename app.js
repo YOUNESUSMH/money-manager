@@ -2,24 +2,48 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const path = require('path');
+const session = require('express-session');
+const MongoStore = require('connect-mongo'); // 👈 تأكد أنه مكتوب هكذا بدون (session) في الآخر
 const User = require('./models/User');
 const app = express();
+
+require('dotenv').config();
 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-require('dotenv').config();
-
+// 📡 الاتصال بقاعدة البيانات MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Connected to MongoDB Atlas"))
   .catch(err => console.error("❌ Connection error:", err));
 
+// 🔐 إعداد نظام الجلسات الآمن (Sessions Configuration)
+app.use(session({
+  secret: 'my_super_secret_key_younes',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI, // 👈 تأكد أنها mongoUrl بالكامل
+    ttl: 14 * 24 * 60 * 60
+  }),
+  cookie: {
+    maxAge: 14 * 24 * 60 * 60 * 1000,
+    httpOnly: true
+  }
+}));
 
-let currentUser = null;
+// 🛡️ Middleware مخصص لحماية المسارات (بدل الفحص اليدوي المتكرر)
+const requireLogin = (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+  next();
+};
 
 // ✅ صفحة تسجيل الدخول
 app.get('/login', (req, res) => {
+  if (req.session.user) return res.redirect('/dashboard'); // إذا كان مسجلاً يذهب للداشبورد فوراً
   res.render('login');
 });
 
@@ -32,33 +56,24 @@ app.post('/login', async (req, res) => {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.send('❌ كلمة المرور غير صحيحة');
 
-  currentUser = user;
+  // 💡 حفظ بيانات المستخدم داخل الجلسة الآمنة الخاصة بهاتف هذا الشخص فقط
+  req.session.user = { _id: user._id, username: user.username };
+  
   res.redirect('/dashboard');
 });
 
+// 🚪 تسجيل الخروج (تدمير الجلسة)
 app.get('/logout', (req, res) => {
-  currentUser = null;
-  res.redirect('/login');
+  req.session.destroy(() => {
+    res.redirect('/login');
+  });
 });
 
-app.get('/create-user', async (req, res) => {
-  const hashedPassword = await bcrypt.hash('YOUNES@', 10);
-  await User.create({ username: 'you', password: hashedPassword });
-  res.send('✅ تم إنشاء المستخدم: you / YOUNES@');
-});
-
-// ✅ لوحة التحكم
-// ✅ لوحة التحكم المطورة بحساب الأرصدة
-// ✅ لوحة التحكم المطورة: فلترة ذكية + إحصائيات شهرية
-app.get('/dashboard', async (req, res) => {
-  if (!currentUser) return res.redirect('/login');
-  
-  const user = await User.findById(currentUser._id);
-  
-  // 1️⃣ جلب نوع الفلتر من الرابط (إذا لم يحدد، يعرض 'all' تلقائياً)
+// ✅ لوحة التحكم (محمية بـ requireLogin)
+app.get('/dashboard', requireLogin, async (req, res) => {
+  const user = await User.findById(req.session.user._id); // جلب البيانات بناءً على جلسة المستخدم الحالي
   const filterType = req.query.type || 'all';
 
-  // 2️⃣ حساب الإحصائيات (تمر على كل العمليات لحساب الإجماليات)
   let totalLoans = 0;
   let totalExpenses = 0;
   let totalIncomes = 0;
@@ -69,190 +84,141 @@ app.get('/dashboard', async (req, res) => {
     if (op.type === 'income') totalIncomes += op.amount;
   });
 
-  const fullBalance = user.balance + totalLoans; // الرصيد الكامل
+  const fullBalance = user.balance + totalLoans;
 
-  // 3️⃣ تصفية (فلترة) مصفوفة العمليات بناءً على طلبك
   let filteredOperations = user.operations;
   if (filterType !== 'all') {
     filteredOperations = user.operations.filter(op => op.type === filterType);
   }
 
-  // 4️⃣ ترتيب العمليات من الأحدث إلى الأقدم (لكي لا تتعب في النزول للأسفل)
   filteredOperations.sort((a, b) => b.date - a.date);
 
-  // إرسال كل البيانات الجديدة إلى صفحة الـ EJS
   res.render('dashboard', { 
     user, 
     fullBalance, 
     totalLoans, 
     totalExpenses, 
-    filteredOperations, // 👈 الجدول سيعرض هذه المصفوفة المفلترة والمنظمة
-    filterType // 👈 لمعرفة الفلتر الحالي وتلوينه
+    filteredOperations, 
+    filterType 
   });
 });
 
 // ✅ إضافة دخل
-app.post('/add-income', async (req, res) => {
+app.post('/add-income', requireLogin, async (req, res) => {
   const amount = parseFloat(req.body.amount);
-  await User.findByIdAndUpdate(currentUser._id, {
+  await User.findByIdAndUpdate(req.session.user._id, {
     $inc: { balance: amount },
-    $push: {
-      operations: {
-        amount,
-        type: 'income',
-        date: new Date()
-      }
-    }
+    $push: { operations: { amount, type: 'income', date: new Date() } }
   });
   res.redirect('/dashboard');
 });
 
 // ✅ إضافة سلف مع اسم الشخص
-app.post('/add-loan', async (req, res) => {
+app.post('/add-loan', requireLogin, async (req, res) => {
   const amount = parseFloat(req.body.amount);
   const to = req.body.to;
-  await User.findByIdAndUpdate(currentUser._id, {
+  await User.findByIdAndUpdate(req.session.user._id, {
     $inc: { balance: -amount },
-    $push: {
-      operations: {
-        amount,
-        type: 'loan',
-        to,
-        date: new Date()
-      }
-    }
+    $push: { operations: { amount, type: 'loan', to, date: new Date() } }
+  });
+  res.redirect('/dashboard');
+});
+
+// ✅ إضافة مصروف شخصي مرن
+app.post('/add-expense', requireLogin, async (req, res) => {
+  const amount = parseFloat(req.body.amount);
+  let category = req.body.category;
+
+  if (category === 'custom') {
+    category = req.body.custom_category || 'أخرى';
+  }
+
+  await User.findByIdAndUpdate(req.session.user._id, {
+    $inc: { balance: -amount },
+    $push: { operations: { amount, type: 'personal', category, date: new Date() } }
   });
   res.redirect('/dashboard');
 });
 
 // ✅ حذف عملية
-// ✅ دالة الحذف المصححة والمضمونة لجميع العمليات
-app.post('/delete-operation/:opId', async (req, res) => {
+app.post('/delete-operation/:opId', requireLogin, async (req, res) => {
   const opId = req.params.opId;
-  const user = await User.findById(currentUser._id);
-
+  const user = await User.findById(req.session.user._id);
   const operation = user.operations.id(opId);
+
   if (operation) {
     const amount = operation.amount;
     const type = operation.type;
 
-    if (type === 'income') user.balance -= amount; // حذف الدخل ينقص الرصيد
-    if (type === 'loan') user.balance += amount;   // حذف السلفة يعيد المال للرصيد
-    
-    // 💡 التعديل الجديد هنا لحل مشكلتك:
-    if (type === 'personal') user.balance += amount; // حذف المصروف يعيد المال للرصيد الحالي
+    if (type === 'income') user.balance -= amount;
+    if (type === 'loan') user.balance += amount;
+    if (type === 'personal') user.balance += amount;
 
     operation.deleteOne();
     await user.save();
   }
-
   res.redirect('/dashboard');
 });
 
 // ✅ عرض صفحة التعديل
-app.get('/edit-operation/:opId', async (req, res) => {
-  const user = await User.findById(currentUser._id);
+app.get('/edit-operation/:opId', requireLogin, async (req, res) => {
+  const user = await User.findById(req.session.user._id);
   const operation = user.operations.id(req.params.opId);
   res.render('edit', { operation });
 });
 
 // ✅ تعديل العملية
-app.post('/edit-operation/:opId', async (req, res) => {
-  const { amount, to } = req.body;
-  const user = await User.findById(currentUser._id);
+app.post('/edit-operation/:opId', requireLogin, async (req, res) => {
+  const { amount, to, category } = req.body;
+  const user = await User.findById(req.session.user._id);
   const operation = user.operations.id(req.params.opId);
 
   if (operation) {
-    // إرجاع الرصيد القديم
     if (operation.type === 'income') user.balance -= operation.amount;
     if (operation.type === 'loan') user.balance += operation.amount;
+    if (operation.type === 'personal') user.balance += operation.amount;
 
-    // تعديل القيم
     operation.amount = parseFloat(amount);
     if (operation.type === 'loan') operation.to = to;
+    if (operation.type === 'personal') operation.category = category || 'أخرى';
 
-    // تطبيق التعديل على الرصيد الجديد
     if (operation.type === 'income') user.balance += parseFloat(amount);
     if (operation.type === 'loan') user.balance -= parseFloat(amount);
+    if (operation.type === 'personal') user.balance -= parseFloat(amount);
 
     await user.save();
   }
-
-  res.redirect('/dashboard');
-});
-
-// ✅ مسار إضافة مصروف مطور بالفئة
-// ✅ مسار إضافة مصروف مرن (يدعم الخيارات الجاهزة والمخصصة)
-app.post('/add-expense', async (req, res) => {
-  const amount = parseFloat(req.body.amount);
-  let category = req.body.category;
-
-  // 💡 إذا اختار المستخدم "كتابة فئة أخرى"، نأخذ النص الذي كتبه بيده
-  if (category === 'custom') {
-    category = req.body.custom_category || 'أخرى';
-  }
-
-  await User.findByIdAndUpdate(currentUser._id, {
-    $inc: { balance: -amount },
-    $push: {
-      operations: {
-        amount,
-        type: 'personal',
-        category, // 👈 سيتم حفظ النص المكتوب بيدك هنا بسلام
-        date: new Date()
-      }
-    }
-  });
-
   res.redirect('/dashboard');
 });
 
 // صفحة التسجيل
 app.get('/register', (req, res) => {
-  res.render('register'); // ملف EJS جديد اسمه register.ejs
+  if (req.session.user) return res.redirect('/dashboard');
+  res.render('register');
 });
 
-// استقبال بيانات التسجيل
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
-
   try {
-    // نتأكد إذا كان الاسم موجود مسبقًا
     const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.send('اسم المستخدم موجود بالفعل');
-    }
+    if (existingUser) return res.send('اسم المستخدم موجود بالفعل');
 
-    // تشفير كلمة المرور
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // إنشاء مستخدم جديد
-    const newUser = new User({
-      username,
-      password: hashedPassword,
-      balance: 0,
-      operations: []
-    });
-
+    const newUser = new User({ username, password: hashedPassword, balance: 0, operations: [] });
     await newUser.save();
 
-    res.redirect('/login'); // بعد التسجيل يروح لصفحة تسجيل الدخول
+    res.redirect('/login');
   } catch (err) {
     console.error(err);
     res.send('حدث خطأ أثناء التسجيل');
   }
 });
 
-
-// ✅ الصفحة الرئيسية
 app.get('/', (req, res) => {
-  res.redirect('/login'); // يحول تلقائياً إلى صفحة تسجيل الدخول
+  res.redirect('/login');
 });
-
 
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
-  console.log(`🚀 الخادم يعمل على http://localhost:${PORT}`);
+  console.log(`🚀 الخادم يعمل بأمان على http://localhost:${PORT}`);
 });
-
