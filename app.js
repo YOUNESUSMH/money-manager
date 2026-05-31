@@ -247,6 +247,76 @@ app.post('/admin/delete-user/:userId', requireLogin, async (req, res) => {
   res.redirect('/admin-panel');
 });
 
+// 🎯 1. مسار إنشاء هدف ادخار جديد
+// 🎯 1. مسار إنشاء هدف ادخار جديد
+app.post('/add-goal', requireLogin, async (req, res) => {
+  const { title, targetAmount } = req.body;
+  
+  await User.findByIdAndUpdate(req.session.user._id, {
+    $push: {
+      savingsGoals: {
+        title,
+        targetAmount: parseFloat(targetAmount),
+        savedAmount: 0
+      }
+    }
+  });
+  res.redirect('/dashboard');
+});
+
+// 💰 2. مسار الإيداع داخل الحصالة (يخصم من الرصيد ويضيف للحصالة)
+app.post('/deposit-goal/:goalId', requireLogin, async (req, res) => {
+  const goalId = req.params.goalId;
+  const depositAmount = parseFloat(req.body.depositAmount);
+  
+  const user = await User.findById(req.session.user._id);
+  
+  // حماية: التأكد أن المستخدم يملك مالاً كافياً في رصيده للإيداع
+  if (user.balance < depositAmount) {
+    return res.send('<script>alert("❌ رصيدك الحالي غير كافٍ لإيداع هذا المبلغ!"); window.location="/dashboard";</script>');
+  }
+
+  // خصم من الرصيد العام وزيادة في الحصالة المحددة
+  user.balance -= depositAmount;
+  
+  const goal = user.savingsGoals.id(goalId);
+  if (goal) {
+    goal.savedAmount += depositAmount;
+    
+    // إضافة عملية في السجل لتوثيق الإيداع كأنه مصروف شخصي مخصص للادخار
+    user.operations.push({
+      amount: depositAmount,
+      type: 'personal',
+      category: `🎯 ادخار: ${goal.title}`,
+      date: new Date()
+    });
+    
+    await user.save();
+  }
+  
+  res.redirect('/dashboard');
+});
+
+// 🔨 مسار حذف وكسر الحصالة (المسار المفقود الذي تسبب في الخطأ)
+app.post('/delete-goal/:goalId', requireLogin, async (req, res) => {
+  const goalId = req.params.goalId;
+  const user = await User.findById(req.session.user._id);
+  
+  const goal = user.savingsGoals.id(goalId);
+  
+  if (goal) {
+    // إرجاع الأموال المخزنة داخل الحصالة إلى رصيدك الكلي قبل الحذف
+    user.balance += goal.savedAmount;
+    
+    // إزالة الحصالة تماماً من قاعدة البيانات
+    user.savingsGoals.pull(goalId);
+    
+    await user.save();
+  }
+  
+  res.redirect('/dashboard');
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 الخادم يعمل بأمان على http://localhost:${PORT}`);

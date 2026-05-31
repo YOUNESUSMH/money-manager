@@ -40,28 +40,103 @@
         <option value="نقل">🚌 مواصلات ونقل</option>
         <option value="إنترنت">📱 إنترنت ورصيد هاتف</option>
         <option value="ملابس">👕 ملابس ومشتريات</option>
-        <option value="custom">✍️ كتابة فئة أخرى...</option> </select>
+        <option value="custom">✍️ كتابة فئة أخرى...</option> 
+      </select>
 
       <input type="text" name="custom_category" id="custom-category-input" placeholder="اكتب هنا ماذا صرفت..." style="display: none; margin-top: 5px; border-color: #e67e22;">
       
       <button type="submit">📉 خصم مصروف</button>
     </form>
+  </div>
 
-    <script>
-      function togglecustomInput() {
-        const select = document.getElementById('category-select');
-        const input = document.getElementById('custom-category-input');
-        
-        if (select.value === 'custom') {
-          input.style.display = 'block'; // إظهار الحقل
-          input.required = true;         // جعله إجبارياً
-          input.focus();                 // فتح الكيبورد تلقائياً في الهاتف
-        } else {
-          input.style.display = 'none';  // إخفاء الحقل
-          input.required = false;
-        }
+  <script>
+    function togglecustomInput() {
+      const select = document.getElementById('category-select');
+      const input = document.getElementById('custom-category-input');
+      
+      if (select.value === 'custom') {
+        input.style.display = 'block'; 
+        input.required = true;         
+        input.focus();                 
+      } else {
+        input.style.display = 'none';  
+        input.required = false;
       }
-    </script>
+    }
+  </script>
+
+  <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-top: 25px; margin-bottom: 25px; text-align: right;" dir="rtl">
+    <h3 style="color: #2c3e50; margin-top: 0; border-bottom: 2px solid #f1f2f6; padding-bottom: 10px;">🎯 حصالتي الرقمية وأهدافي</h3>
+    
+    <form action="/add-goal" method="POST" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+      <input type="text" name="title" placeholder="اسم الهدف (مثلاً: هاتف جديد)" required style="flex: 2; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+      <input type="number" name="targetAmount" placeholder="المبلغ المطلوب" required style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+      <button type="submit" style="background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">+ إضافة هدف</button>
+    </form>
+
+    <div style="display: flex; flex-direction: column; gap: 15px;">
+      <% if (user.savingsGoals && user.savingsGoals.length > 0) { %>
+        
+        <h4 style="color: #2980b9; margin: 5px 0 0 0; font-size: 0.95rem;">⏳ الأهداف الحالية المتبقية:</h4>
+        <% let activeGoalsCount = 0; %>
+        <% user.savingsGoals.forEach(goal => { %>
+          <% let percentage = Math.min(Math.round((goal.savedAmount / goal.targetAmount) * 100), 100); %>
+          <% if (percentage < 100) { %>
+            <% activeGoalsCount++; %>
+            <div style="border: 1px solid #eee; padding: 15px; border-radius: 8px; background: #fbfbfb;">
+              <div style="display: flex; justify-content: space-between; font-weight: bold; color: #34495e; margin-bottom: 8px;">
+                <span>📱 <%= goal.title %></span>
+                <span style="color: #2980b9;"><%= goal.savedAmount %> / <%= goal.targetAmount %> دج (<%= percentage %>%)</span>
+              </div>
+
+              <div style="width: 100%; background: #e0e0e0; height: 10px; border-radius: 6px; overflow: hidden; margin-bottom: 12px;">
+                <div style="width: <%= percentage %>%; background: linear-gradient(90deg, #3498db, #2ecc71); height: 100%;"></div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <form action="/delete-goal/<%= goal._id %>" method="POST" onsubmit="return confirm('هل تريد كسر هذه الحصالة واسترجاع الأموال؟');" style="margin:0;">
+                  <button type="submit" style="background-color: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">🔨 كسر واسترجاع</button>
+                </form>
+
+                <form action="/deposit-goal/<%= goal._id %>" method="POST" style="display: flex; gap: 5px; margin:0;">
+                  <input type="number" name="depositAmount" placeholder="المبلغ" required style="width: 80px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem;">
+                  <button type="submit" style="background: #3498db; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">💰 إيداع</button>
+                </form>
+              </div>
+            </div>
+          <% } %>
+        <% }) %>
+        <% if (activeGoalsCount === 0) { %>
+          <p style="color: #95a5a6; font-size: 0.85rem; padding-right: 10px;">لا توجد أهداف قيد التقدم حالياً.</p>
+        <% } %>
+
+        <hr style="border: 0; border-top: 1px dashed #ddd; margin: 15px 0;">
+
+        <h4 style="color: #27ae60; margin: 0; font-size: 0.95rem;">🏆 الأهداف التي حققتها بنجاح (الأرشيف):</h4>
+        <% let completedGoalsCount = 0; %>
+        <% user.savingsGoals.forEach(goal => { %>
+          <% let percentage = Math.min(Math.round((goal.savedAmount / goal.targetAmount) * 100), 100); %>
+          <% if (percentage === 100) { %>
+            <% completedGoalsCount++; %>
+            <div style="border: 1px dashed #27ae60; padding: 8px 15px; border-radius: 6px; background: #f4fbf7; display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+              <span style="font-weight: bold; color: #27ae60;">🎉 <%= goal.title %></span>
+              <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="color: #7f8c8d; font-size: 0.85rem; font-weight: bold;"><%= goal.targetAmount %> دج (مكتمل)</span>
+                <form action="/delete-goal/<%= goal._id %>" method="POST" onsubmit="return confirm('هل تريد حذف هذا الهدف المحقق من الأرشيف نهائياً؟');" style="margin:0;">
+                  <button type="submit" style="background: none; border: none; color: #95a5a6; cursor: pointer; font-size: 0.9rem;">🗑️</button>
+                </form>
+              </div>
+            </div>
+          <% } %>
+        <% }) %>
+        <% if (completedGoalsCount === 0) { %>
+          <p style="color: #95a5a6; font-size: 0.85rem; padding-right: 10px;">لم تحقق أي هدف بعد.</p>
+        <% } %>
+
+      <% } else { %>
+        <p style="color: #7f8c8d; font-size: 0.9rem; text-align: center; margin: 10px 0;">لا توجد أهداف ادخار حالياً، ابدأ بإضافة هدفك الأول فوق! 🚀</p>
+      <% } %>
+    </div>
   </div>
 
   <h3>📜 سجل المعاملات:</h3>
@@ -76,7 +151,7 @@
     <tr>
       <th>النوع</th>
       <th>المبلغ</th>
-      <th>إلى</th>
+      <th>إلى/الفئة</th>
       <th>التاريخ</th>
       <th>الإجراءات</th>
     </tr>
@@ -93,7 +168,7 @@
           <% } %>
         </td>
         <td><strong><%= op.amount %> دج</strong></td>
-        <td><%= op.to || '-' %></td>
+        <td><%= op.to || op.category || '-' %></td>
         <td><%= op.date.toLocaleDateString() %></td>
         <td>
           <form action="/delete-operation/<%= op._id %>" method="POST" style="display:inline;">
@@ -107,6 +182,6 @@
     <% }) %>
   </table>
 
-  <a href="/logout" class="logout-btn">🚪 تسجيل الخروج</a>
+  <a href="/logout" class="logout-btn" style="display: block; width: fit-content; margin: 20px auto; padding: 10px 20px; background: #95a5a6; color: white; text-decoration: none; border-radius: 5px;">🚪 تسجيل الخروج</a>
 </body>
 </html>
