@@ -5,30 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة التحكم</title>
   <link rel="stylesheet" href="/style.css">
-  <style>
-  /* صندوق التنبيه الأساسي */
-  .crypto-toast {
-    position: fixed;
-    top: -100px; /* مخفي فوق الشاشة في البداية */
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #e67e22; /* لون برتقالي تحذيري */
-    color: white;
-    padding: 15px 25px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    font-weight: bold;
-    z-index: 9999;
-    transition: top 0.5s ease-in-out; /* حركة الانزلاق السلسة */
-    direction: rtl;
-    text-align: right;
-  }
-
-  /* الكلاس الذي يظهره عند تفعيله */
-  .crypto-toast.show {
-    top: 20px; /* ينزل ليتمركز في أعلى الشاشة */
-  }
-</style>
 </head>
 <body>
   <h1> رصيدي  👋</h1>
@@ -207,29 +183,5 @@
   </table>
 
   <a href="/logout" class="logout-btn" style="display: block; width: fit-content; margin: 20px auto; padding: 10px 20px; background: #95a5a6; color: white; text-decoration: none; border-radius: 5px;">🚪 تسجيل الخروج</a>
-
-  <div id="balance-alert" class="crypto-toast">
-  ⚠️ انتبه يا يونس، رصيدك الحالي انخفض تحت 2000 دج! خفف من المصاريف.
-</div>
-
-<script>
-  // قراءة رصيدك الحالي من خلال الـ EJS وتمريره للجافاسكريبت
-  const currentBalance = parseFloat("<%= user.balance %>");
-
-  // التحقق مما إذا كان الرصيد أقل من 2000 دج
-  if (currentBalance < 2000) {
-    const alertBox = document.getElementById('balance-alert');
-    
-    // 1. إظهار التنبيه بعد ثانية واحدة من فتح الموقع بنعومة
-    setTimeout(() => {
-      alertBox.classList.add('show');
-    }, 1000);
-
-    // 2. إخفاء التنبيه تلقائياً بعد 5 ثوانٍ من ظهوره
-    setTimeout(() => {
-      alertBox.classList.remove('show');
-    }, 6000);
-  }
-</script>
 </body>
 </html>
